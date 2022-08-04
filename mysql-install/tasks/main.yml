@@ -1,0 +1,56 @@
+---
+# tasks for msql-install
+- name: Update Apt
+  apt:
+     update_cache: True
+
+- name: install mysql packages
+  apt:
+     name: '{{ item }}'
+     state: latest
+  with_items:
+      - mysql-server
+      - mysql-client
+      - python3-pymysql
+
+- name: ensure mysql running
+  service: 
+     name: mysql 
+     state: started 
+     enabled: yes
+
+- name: Change the authentication plugin of MySQL root user to mysql_native_password
+  shell: mysql -u root -e 'UPDATE mysql.user SET plugin="mysql_native_password"
+    WHERE user="root" AND host="localhost"'
+  register: ret
+  failed_when: >
+    (ret.rc != 0) and
+    (ret.stderr_lines != ["ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)"])
+
+- name: Flush Privileges
+  shell: mysql -u root -e 'FLUSH PRIVILEGES'
+  register: ret
+  failed_when: >
+    (ret.rc != 0) and
+    (ret.stderr_lines != ["ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)"])
+
+- name: Set MySQL root password
+  mysql_user:
+     login_host: 'localhost'
+     login_user: 'root'
+     login_password: ''
+     name: 'root'
+     password: '{{ mysql_rootpass }}'
+     state: present
+  register: ret
+  failed_when: >
+    (ret.changed != true) and
+    (ret.msg != "unable to connect to database, check login_user and login_password are correct or /root/.my.cnf has the credentials. Exception message: (1045, \"Access denied for user 'root'@'localhost' (using password: NO)\")")
+
+- name: Create mysql wordpress db
+  mysql_db:
+     login_host: 'localhost'
+     login_user: 'root'
+     login_password: '{{ mysql_rootpass }}'
+     name: '{{ wp_dbname }}' 
+     state: present

@@ -1,0 +1,4 @@
+---
+# defaults file for wp-install
+mysql_rootpass: default
+wp_dbname: default

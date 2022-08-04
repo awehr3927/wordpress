@@ -1,0 +1,11 @@
+---
+- name: Refresh Apt Cache
+  apt:
+     update_cache: True
+- name: install php packages
+  apt:
+     name: '{{ item }}'
+     state: latest
+  with_items:
+      - php
+      - php-mysql

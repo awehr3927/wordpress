@@ -1,0 +1,5 @@
+---
+# defaults file for apache2-install
+#
+mysql_rootpass: default
+wp_dbname: default

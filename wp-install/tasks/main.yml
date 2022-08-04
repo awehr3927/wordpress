@@ -1,0 +1,49 @@
+---
+# tasks file for wp-install
+- name: install dos2unix
+  apt:
+     name: dos2unix
+     state: latest
+
+- name: Untar wordpress into WWW directly from wordpress.org
+  shell: sudo wget -qO- https://wordpress.org/latest.tar.gz | sudo  tar zxv --strip 1  --directory /var/www/html/ --overwrite
+
+- name: remove default index
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Copy Sample Config
+  copy:
+    src: /var/www/html/wp-config-sample.php
+    dest: /var/www/html/wp-config-changeme.php
+    remote_src: yes
+
+- name: Update db name
+  lineinfile:
+    path: /var/www/html/wp-config-changeme.php
+    regexp: 'database_name_here'
+    line: "define( 'DB_NAME', '{{ wp_dbname }}' );"
+
+- name: Update db user
+  lineinfile:
+    path: /var/www/html/wp-config-changeme.php
+    regexp: 'username_here'
+    line: "define( 'DB_USER', 'root' );"
+
+- name: Update db pass
+  lineinfile:
+    path: /var/www/html/wp-config-changeme.php
+    regexp: 'password_here'
+    line: "define( 'DB_PASSWORD', '{{ mysql_rootpass }}' );"
+
+- name: Move Updated Config Into Place
+  command: mv /var/www/html/wp-config-changeme.php /var/www/html/wp-config.php
+
+- name: Correct Dos Formatting By Ansible Upon Copy
+  shell:  dos2unix /var/www/html/wp-config.php
+
+- name: restart apache2
+  service:
+    name: apache2
+    state: reloaded

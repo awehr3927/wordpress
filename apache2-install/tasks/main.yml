@@ -1,0 +1,17 @@
+---
+- name: Refresh Apt Cache
+  apt:
+     update_cache: True
+- name: install apache packages
+  apt: 
+     name: "{{ item }}"
+     state: latest
+  with_items:
+      - apache2
+      - libapache2-mod-php
+
+- name: start apache
+  service: 
+     name: apache2 
+     state: started 
+     enabled: yes
