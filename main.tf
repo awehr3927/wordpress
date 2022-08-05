@@ -5,10 +5,11 @@ locals {
   my_ami = "ami-08d4ac5b634553e16"
 }
 
+
 provider "aws" {
   region = "us-east-1"
-  access_key = "AKIAZVUFVRKLGQYWJRFJ"
-  secret_key = "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"
+  access_key = "AKIAZVUFVRKLNQWKK4U7"
+  secret_key = "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"
 }
 
 resource "aws_key_pair" "login" {
